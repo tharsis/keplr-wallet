@@ -339,6 +339,11 @@ export class KeyRingService {
 
     const newSignDoc = cosmos.tx.v1beta1.SignDoc.decode(newSignDocBytes);
 
+    console.log("Generated sign doc");
+    console.log(newSignDoc);
+    console.log("Is Ethereum?");
+    console.log(signOptions.isEthereum);
+
     try {
       const signature = signOptions.isEthereum
         ? await this.keyRing.signEthereum(

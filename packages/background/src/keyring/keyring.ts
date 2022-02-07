@@ -14,7 +14,9 @@ import { Env } from "@keplr-wallet/router";
 import { Buffer } from "buffer/";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
-import { Wallet } from "ethers";
+import { Wallet, utils } from "ethers";
+
+// import { signEthSecp256k1 } from "@hanchon/evmos-signer";
 
 export enum KeyRingStatus {
   NOTLOADED,
@@ -686,6 +688,8 @@ export class KeyRing {
     defaultCoinType: number,
     message: Uint8Array
   ): Promise<Uint8Array> {
+    console.log("Attempting to sign Ethereum");
+
     if (this.status !== KeyRingStatus.UNLOCKED) {
       throw new Error("Key ring is not unlocked");
     }
@@ -711,18 +715,60 @@ export class KeyRing {
       throw new Error("Ethereum signing with Ledger is not yet supported");
     } else {
       const coinType = this.computeKeyStoreCoinType(chainId, defaultCoinType);
-      if (coinType !== 60) {
-        throw new Error(
-          "Invalid coin type passed in to Ethereum signing (expected 60)"
-        );
-      }
+      // const coinType = 60;
+      // if (coinType !== 60) {
+      //   throw new Error(
+      //     "Invalid coin type passed in to Ethereum signing (expected 60)"
+      //   );
+      // }
 
       const privKey = this.loadPrivKey(coinType);
 
       // Use ether js to sign Ethereum tx
       const ethWallet = new Wallet(privKey.toBytes());
+      console.log("Pub Key");
+      console.log(ethWallet.publicKey);
+      console.log("Address");
+      console.log(ethWallet.address);
+      console.log("Message");
+      console.log(message.toString());
+      console.log(new TextDecoder("utf-8").decode(message));
+      console.log(message);
+      console.log(Buffer.from(message).toString("hex")); // Worked
       const signature = await ethWallet.signMessage(message);
-      return new TextEncoder().encode(signature);
+
+      const splitSignature = utils.splitSignature(signature);
+
+      const shortenedSignature = utils.hexlify(
+        utils.concat([splitSignature.r, splitSignature._vs])
+      );
+      // const shortenedSignature = splitSignature.r + splitSignature._vs;
+      console.log("Signature");
+      console.log(signature);
+
+      console.log("Shortened signature:");
+      console.log(shortenedSignature);
+      console.log("Byte length of shortened:");
+      console.log(utils.arrayify(shortenedSignature).length);
+      console.log("Alternate shortened 1");
+      console.log(
+        utils.hexlify(utils.concat([splitSignature.r, splitSignature.s]))
+      );
+      // console.log("Alternate shortened 2");
+      // console.log(
+      //   signEthSecp256k1(
+      //     global.Buffer.from(privKey.toBytes()),
+      //     global.Buffer.from(message)
+      //   )
+      // );
+
+      // if (coinType !== 60) {
+      //   throw new Error(
+      //     "Invalid coin type passed in to Ethereum signing (expected 60)"
+      //   );
+      // }
+      // return new TextEncoder().encode(shortenedSignature);
+      return utils.arrayify(shortenedSignature);
     }
   }
 

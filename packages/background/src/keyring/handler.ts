@@ -324,6 +324,9 @@ const handleRequestSignDirectMsg: (
         : undefined,
     });
 
+    console.log("Test log sign doc");
+    console.log(signDoc);
+
     const response = await service.requestSignDirect(
       env,
       msg.origin,

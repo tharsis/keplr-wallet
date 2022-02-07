@@ -120,6 +120,8 @@ export class Keplr implements IKeplr {
       },
       deepmerge(this.defaultOptions.sign ?? {}, signOptions)
     );
+    console.log("Signing direct with sign options:");
+    console.log(signOptions);
     const response = await this.requester.sendMessage(BACKGROUND_PORT, msg);
 
     return {

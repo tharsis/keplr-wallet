@@ -290,6 +290,8 @@ export class InjectedKeplr implements IKeplr {
     },
     signOptions: KeplrSignOptions = {}
   ): Promise<DirectSignResponse> {
+    console.log("Inject sign direct with options");
+    console.log(signOptions);
     const result = await this.requestMethod("signDirect", [
       chainId,
       signer,
