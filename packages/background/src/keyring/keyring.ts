@@ -603,16 +603,13 @@ export class KeyRing {
         const pubKey = privKey.getPubKey();
 
         const wallet = new Wallet(privKey.toBytes());
-        console.log("wallet.publicKey")
-        console.log(wallet.publicKey)
-        console.log("pubKey")
-        console.log(pubKey)
+        const address = ETH.decoder(wallet.address);
 
-        const address = ETH.decoder(wallet.address)
-        // pubKey: utils.arrayify(wallet.publicKey),
         return {
           algo: "ethsecp256k1",
-          // pubKey: new Uint8Array(wallet.publicKey),
+          // in order to use the wallet pubkey we can call the compressed one to send the expected value
+          // Uint8Array.from(wallet._signingKey().compressedPublicKey.split('0x')[1], 'hex')
+          // it's the same as pubkey.toBytes()
           pubKey: pubKey.toBytes(),
           address: address,
           isNanoLedger: false,
