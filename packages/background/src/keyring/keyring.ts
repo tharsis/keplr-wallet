@@ -17,6 +17,7 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { Wallet, utils } from "ethers";
 
 import { ETH } from "@hanchon/ethermint-address-converter"
+import { keccak256 } from "ethers/lib/utils";
 // import { signEthSecp256k1 } from "@hanchon/evmos-signer";
 
 export enum KeyRingStatus {
@@ -749,48 +750,10 @@ export class KeyRing {
 
       // Use ether js to sign Ethereum tx
       const ethWallet = new Wallet(privKey.toBytes());
-      console.log("Pub Key");
-      console.log(ethWallet.publicKey);
-      console.log("Address");
-      console.log(ethWallet.address);
-      console.log("Message");
-      console.log(message.toString());
-      console.log(new TextDecoder("utf-8").decode(message));
-      console.log(message);
-      console.log(Buffer.from(message).toString("hex")); // Worked
-      const signature = await ethWallet.signMessage(message);
 
+      const signature = await ethWallet._signingKey().signDigest(keccak256(message));
       const splitSignature = utils.splitSignature(signature);
-
-      const shortenedSignature = utils.hexlify(
-        utils.concat([splitSignature.r, splitSignature._vs])
-      );
-      // const shortenedSignature = splitSignature.r + splitSignature._vs;
-      console.log("Signature");
-      console.log(signature);
-
-      console.log("Shortened signature:");
-      console.log(shortenedSignature);
-      console.log("Byte length of shortened:");
-      console.log(utils.arrayify(shortenedSignature).length);
-      console.log("Alternate shortened 1");
-      const short2 = utils.hexlify(utils.concat([splitSignature.r, splitSignature.s]))
-      console.log(short2);
-      // console.log("Alternate shortened 2");
-      // console.log(
-      //   signEthSecp256k1(
-      //     global.Buffer.from(arrayify(ethWallet.privateKey)),
-      //     global.Buffer.from(message)
-      //   )
-      // );
-
-      // if (coinType !== 60) {
-      //   throw new Error(
-      //     "Invalid coin type passed in to Ethereum signing (expected 60)"
-      //   );
-      // }
-      // return new TextEncoder().encode(shortenedSignature);
-      return utils.arrayify(short2);
+      return utils.arrayify(utils.concat([splitSignature.r, splitSignature.s]));
     }
   }
 
