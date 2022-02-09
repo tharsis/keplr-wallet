@@ -16,6 +16,7 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 import { Wallet, utils } from "ethers";
 
+import { ETH } from "@hanchon/ethermint-address-converter"
 // import { signEthSecp256k1 } from "@hanchon/evmos-signer";
 
 export enum KeyRingStatus {
@@ -194,8 +195,8 @@ export class KeyRing {
 
     return this.keyStore.coinTypeForChain
       ? this.keyStore.coinTypeForChain[
-          ChainIdHelper.parse(chainId).identifier
-        ] ?? defaultCoinType
+      ChainIdHelper.parse(chainId).identifier
+      ] ?? defaultCoinType
       : defaultCoinType;
   }
 
@@ -441,7 +442,7 @@ export class KeyRing {
     return (
       this.keyStore.coinTypeForChain &&
       this.keyStore.coinTypeForChain[
-        ChainIdHelper.parse(chainId).identifier
+      ChainIdHelper.parse(chainId).identifier
       ] !== undefined
     );
   }
@@ -454,7 +455,7 @@ export class KeyRing {
     if (
       this.keyStore.coinTypeForChain &&
       this.keyStore.coinTypeForChain[
-        ChainIdHelper.parse(chainId).identifier
+      ChainIdHelper.parse(chainId).identifier
       ] !== undefined
     ) {
       throw new Error("Coin type already set");
@@ -593,6 +594,31 @@ export class KeyRing {
         isNanoLedger: true,
       };
     } else {
+      // ETH key
+      console.log("loadKey..")
+      console.log(coinType)
+      if (coinType == 60) {
+        console.log("loadKey with 60")
+        const privKey = this.loadPrivKey(coinType);
+        const pubKey = privKey.getPubKey();
+
+        const wallet = new Wallet(privKey.toBytes());
+        console.log("wallet.publicKey")
+        console.log(wallet.publicKey)
+        console.log("pubKey")
+        console.log(pubKey)
+
+        const address = ETH.decoder(wallet.address)
+        // pubKey: utils.arrayify(wallet.publicKey),
+        return {
+          algo: "ethsecp256k1",
+          // pubKey: new Uint8Array(wallet.publicKey),
+          pubKey: pubKey.toBytes(),
+          address: address,
+          isNanoLedger: false,
+        }
+      }
+
       const privKey = this.loadPrivKey(coinType);
       const pubKey = privKey.getPubKey();
 
@@ -751,13 +777,12 @@ export class KeyRing {
       console.log("Byte length of shortened:");
       console.log(utils.arrayify(shortenedSignature).length);
       console.log("Alternate shortened 1");
-      console.log(
-        utils.hexlify(utils.concat([splitSignature.r, splitSignature.s]))
-      );
+      const short2 = utils.hexlify(utils.concat([splitSignature.r, splitSignature.s]))
+      console.log(short2);
       // console.log("Alternate shortened 2");
       // console.log(
       //   signEthSecp256k1(
-      //     global.Buffer.from(privKey.toBytes()),
+      //     global.Buffer.from(arrayify(ethWallet.privateKey)),
       //     global.Buffer.from(message)
       //   )
       // );
@@ -768,7 +793,7 @@ export class KeyRing {
       //   );
       // }
       // return new TextEncoder().encode(shortenedSignature);
-      return utils.arrayify(shortenedSignature);
+      return utils.arrayify(short2);
     }
   }
 
@@ -930,7 +955,7 @@ export class KeyRing {
         bip44HDPath: keyStore.bip44HDPath,
         selected: this.keyStore
           ? KeyRing.getKeyStoreId(keyStore) ===
-            KeyRing.getKeyStoreId(this.keyStore)
+          KeyRing.getKeyStoreId(this.keyStore)
           : false,
       });
     }
