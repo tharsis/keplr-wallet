@@ -16,6 +16,8 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 import { Wallet, utils } from "ethers";
 
+import { ETH } from "@hanchon/ethermint-address-converter"
+import { keccak256 } from "ethers/lib/utils";
 // import { signEthSecp256k1 } from "@hanchon/evmos-signer";
 
 export enum KeyRingStatus {
@@ -194,8 +196,8 @@ export class KeyRing {
 
     return this.keyStore.coinTypeForChain
       ? this.keyStore.coinTypeForChain[
-          ChainIdHelper.parse(chainId).identifier
-        ] ?? defaultCoinType
+      ChainIdHelper.parse(chainId).identifier
+      ] ?? defaultCoinType
       : defaultCoinType;
   }
 
@@ -441,7 +443,7 @@ export class KeyRing {
     return (
       this.keyStore.coinTypeForChain &&
       this.keyStore.coinTypeForChain[
-        ChainIdHelper.parse(chainId).identifier
+      ChainIdHelper.parse(chainId).identifier
       ] !== undefined
     );
   }
@@ -454,7 +456,7 @@ export class KeyRing {
     if (
       this.keyStore.coinTypeForChain &&
       this.keyStore.coinTypeForChain[
-        ChainIdHelper.parse(chainId).identifier
+      ChainIdHelper.parse(chainId).identifier
       ] !== undefined
     ) {
       throw new Error("Coin type already set");
@@ -593,6 +595,28 @@ export class KeyRing {
         isNanoLedger: true,
       };
     } else {
+      // ETH key
+      console.log("loadKey..")
+      console.log(coinType)
+      if (coinType == 60) {
+        console.log("loadKey with 60")
+        const privKey = this.loadPrivKey(coinType);
+        const pubKey = privKey.getPubKey();
+
+        const wallet = new Wallet(privKey.toBytes());
+        const address = ETH.decoder(wallet.address);
+
+        return {
+          algo: "ethsecp256k1",
+          // in order to use the wallet pubkey we can call the compressed one to send the expected value
+          // Uint8Array.from(wallet._signingKey().compressedPublicKey.split('0x')[1], 'hex')
+          // it's the same as pubkey.toBytes()
+          pubKey: pubKey.toBytes(),
+          address: address,
+          isNanoLedger: false,
+        }
+      }
+
       const privKey = this.loadPrivKey(coinType);
       const pubKey = privKey.getPubKey();
 
@@ -726,49 +750,10 @@ export class KeyRing {
 
       // Use ether js to sign Ethereum tx
       const ethWallet = new Wallet(privKey.toBytes());
-      console.log("Pub Key");
-      console.log(ethWallet.publicKey);
-      console.log("Address");
-      console.log(ethWallet.address);
-      console.log("Message");
-      console.log(message.toString());
-      console.log(new TextDecoder("utf-8").decode(message));
-      console.log(message);
-      console.log(Buffer.from(message).toString("hex")); // Worked
-      const signature = await ethWallet.signMessage(message);
 
+      const signature = await ethWallet._signingKey().signDigest(keccak256(message));
       const splitSignature = utils.splitSignature(signature);
-
-      const shortenedSignature = utils.hexlify(
-        utils.concat([splitSignature.r, splitSignature._vs])
-      );
-      // const shortenedSignature = splitSignature.r + splitSignature._vs;
-      console.log("Signature");
-      console.log(signature);
-
-      console.log("Shortened signature:");
-      console.log(shortenedSignature);
-      console.log("Byte length of shortened:");
-      console.log(utils.arrayify(shortenedSignature).length);
-      console.log("Alternate shortened 1");
-      console.log(
-        utils.hexlify(utils.concat([splitSignature.r, splitSignature.s]))
-      );
-      // console.log("Alternate shortened 2");
-      // console.log(
-      //   signEthSecp256k1(
-      //     global.Buffer.from(privKey.toBytes()),
-      //     global.Buffer.from(message)
-      //   )
-      // );
-
-      // if (coinType !== 60) {
-      //   throw new Error(
-      //     "Invalid coin type passed in to Ethereum signing (expected 60)"
-      //   );
-      // }
-      // return new TextEncoder().encode(shortenedSignature);
-      return utils.arrayify(shortenedSignature);
+      return utils.arrayify(utils.concat([splitSignature.r, splitSignature.s]));
     }
   }
 
@@ -930,7 +915,7 @@ export class KeyRing {
         bip44HDPath: keyStore.bip44HDPath,
         selected: this.keyStore
           ? KeyRing.getKeyStoreId(keyStore) ===
-            KeyRing.getKeyStoreId(this.keyStore)
+          KeyRing.getKeyStoreId(this.keyStore)
           : false,
       });
     }
