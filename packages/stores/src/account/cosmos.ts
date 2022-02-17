@@ -110,6 +110,7 @@ export class CosmosAccount {
           onFulfill?: (tx: any) => void;
         }
   ): Promise<boolean> {
+    console.log("Cosmos.ts - process send token");
     const denomHelper = new DenomHelper(currency.coinMinimalDenom);
 
     switch (denomHelper.type) {

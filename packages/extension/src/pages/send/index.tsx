@@ -186,7 +186,7 @@ export const SendPage: FunctionComponent = observer(() => {
           if (accountInfo.isReadyToSendMsgs && txStateIsValid) {
             try {
               const stdFee = sendConfigs.feeConfig.toStdFee();
-
+              console.log("send/index.ts - calling send token");
               await accountInfo.sendToken(
                 sendConfigs.amountConfig.amount,
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -197,9 +197,11 @@ export const SendPage: FunctionComponent = observer(() => {
                 {
                   preferNoSetFee: true,
                   preferNoSetMemo: true,
+                  isEthereum: chainStore.current.coinType === 60,
                 },
                 (tx: any) => {
                   const isSuccess = tx.code == null || tx.code === 0;
+                  console.log(`send/index.ts - got result:  + ${isSuccess}`);
                   analyticsStore.logEvent("Send token finished", {
                     chainId: chainStore.current.chainId,
                     chainName: chainStore.current.chainName,

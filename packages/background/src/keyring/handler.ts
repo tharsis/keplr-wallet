@@ -268,6 +268,7 @@ const handleGetKeyMsg: (
 const handleRequestSignAminoMsg: (
   service: KeyRingService
 ) => InternalHandler<RequestSignAminoMsg> = (service) => {
+  console.log("handler.ts - beginning handle request sign amino");
   return async (env, msg) => {
     await service.permissionService.checkOrGrantBasicAccessPermission(
       env,
@@ -275,6 +276,7 @@ const handleRequestSignAminoMsg: (
       msg.origin
     );
 
+    console.log("handler.ts - calling service sign amino");
     return await service.requestSignAmino(
       env,
       msg.origin,

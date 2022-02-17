@@ -503,6 +503,10 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
   }
 
   validateBasic(): void {
+    console.log(
+      "keyring/messages.ts:validateBasic - Starting validation SignAmino"
+    );
+
     if (!this.chainId) {
       throw new Error("chain id not set");
     }
@@ -531,6 +535,10 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
     if (!this.signOptions) {
       throw new Error("Sign options are null");
     }
+
+    console.log(
+      "keyring/messages.ts:validateBasic - Passed validation SignAmino"
+    );
   }
 
   approveExternal(): boolean {
@@ -561,6 +569,7 @@ export class RequestVerifyADR36AminoSignDoc extends Message<boolean> {
   }
 
   validateBasic(): void {
+    console.log("keyring/messages.ts - begin validate adr36");
     if (!this.chainId) {
       throw new Error("chain id not set");
     }
@@ -575,6 +584,7 @@ export class RequestVerifyADR36AminoSignDoc extends Message<boolean> {
 
     // Validate bech32 address.
     Bech32Address.validate(this.signer);
+    console.log("keyring/messages.ts - complete validate adr36");
   }
 
   approveExternal(): boolean {
