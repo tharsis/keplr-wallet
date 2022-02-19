@@ -294,18 +294,12 @@ export class KeyRingService {
     );
 
     try {
-      const signature = signOptions.isEthereum
-        ? await this.keyRing.signEthereum(
-            chainId,
-            coinType,
-            serializeSignDoc(newSignDoc)
-          )
-        : await this.keyRing.sign(
-            env,
-            chainId,
-            coinType,
-            serializeSignDoc(newSignDoc)
-          );
+      const signature = await this.keyRing.sign(
+        env,
+        chainId,
+        coinType,
+        serializeSignDoc(newSignDoc)
+      );
 
       console.log("keyring/service.ts - Returning Ethereum signed signature");
 
