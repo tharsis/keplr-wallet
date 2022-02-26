@@ -87,12 +87,14 @@ export class Keplr implements IKeplr {
     signDoc: StdSignDoc,
     signOptions: KeplrSignOptions = {}
   ): Promise<AminoSignResponse> {
+    console.log("Core.ts:signAmino - Starting request for Amino message");
     const msg = new RequestSignAminoMsg(
       chainId,
       signer,
       signDoc,
       deepmerge(this.defaultOptions.sign ?? {}, signOptions)
     );
+    console.log("Core.ts:signAmino - Returned Amino message");
     return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 
@@ -138,6 +140,7 @@ export class Keplr implements IKeplr {
     signer: string,
     data: string | Uint8Array
   ): Promise<StdSignature> {
+    console.log("core.ts - sign arbitrary");
     let isADR36WithString = false;
     if (typeof data === "string") {
       data = Buffer.from(data).toString("base64");

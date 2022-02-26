@@ -38,6 +38,7 @@ export class BackgroundTxService {
     tx: unknown,
     mode: "async" | "sync" | "block"
   ): Promise<Uint8Array> {
+    console.log("tx/service.ts - calling send tx");
     const chainInfo = await this.chainsService.getChainInfo(chainId);
     const restInstance = Axios.create({
       ...{
@@ -76,14 +77,19 @@ export class BackgroundTxService {
         };
 
     try {
+      console.log("tx/service.ts - beginning post");
+
       const result = await restInstance.post(
         isProtoTx ? "/cosmos/tx/v1beta1/txs" : "/txs",
         params
       );
 
+      console.log("tx/service.ts - successfully hit post");
+
       const txResponse = isProtoTx ? result.data["tx_response"] : result.data;
 
       if (txResponse.code != null && txResponse.code !== 0) {
+        console.log("tx/service.ts - txresponse code error");
         throw new Error(txResponse["raw_log"]);
       }
 
@@ -95,8 +101,11 @@ export class BackgroundTxService {
         BackgroundTxService.processTxResultNotification(this.notification, tx);
       });
 
+      console.log("tx/service.ts - returning hash");
+
       return txHash;
     } catch (e) {
+      console.log("tx/service.ts - hitting error");
       console.log(e);
       BackgroundTxService.processTxErrorNotification(this.notification, e);
       throw e;

@@ -267,6 +267,7 @@ export class AccountSetBase<MsgOpts, Queries> {
           onFulfill?: (tx: any) => void;
         }
   ) {
+    console.log("base.ts:sendMsgs - beginning send msgs");
     runInAction(() => {
       this._isSendingMsg = type;
     });
@@ -306,6 +307,8 @@ export class AccountSetBase<MsgOpts, Queries> {
 
       throw e;
     }
+
+    console.log("base.ts:sendMsgs - completed broadcast");
 
     let onBroadcasted: ((txHash: Uint8Array) => void) | undefined;
     let onFulfill: ((tx: any) => void) | undefined;
@@ -353,6 +356,8 @@ export class AccountSetBase<MsgOpts, Queries> {
         }
       }
 
+      console.log("base.ts:sendMsgs - Line 359");
+
       // Always add the tx hash data.
       if (tx && !tx.hash) {
         tx.hash = Buffer.from(txHash).toString("hex");
@@ -382,6 +387,7 @@ export class AccountSetBase<MsgOpts, Queries> {
           onFulfill?: (tx: any) => void;
         }
   ) {
+    console.log("base.ts:sendToken - calling sendToken");
     for (let i = 0; i < this.sendTokenFns.length; i++) {
       const fn = this.sendTokenFns[i];
 
@@ -416,6 +422,7 @@ export class AccountSetBase<MsgOpts, Queries> {
     txHash: Uint8Array;
     signDoc: StdSignDoc;
   }> {
+    console.log("base.ts:broadcastMsgs - beginning broadcast messages");
     if (this.walletStatus !== WalletStatus.Loaded) {
       throw new Error(`Wallet is not loaded: ${this.walletStatus}`);
     }
@@ -469,6 +476,8 @@ export class AccountSetBase<MsgOpts, Queries> {
       signOptions
     );
 
+    console.log("base.ts:broadcastMsgs - Completed sign Amino");
+
     const signedTx = this.hasNoLegacyStdFeature()
       ? cosmos.tx.v1beta1.TxRaw.encode({
           bodyBytes: cosmos.tx.v1beta1.TxBody.encode({
@@ -507,10 +516,15 @@ export class AccountSetBase<MsgOpts, Queries> {
         }).finish()
       : makeStdTx(signResponse.signed, signResponse.signature);
 
-    return {
+    console.log("base.ts:broadcastMsgs - Generating return signTx");
+
+    const retVal = {
       txHash: await keplr.sendTx(this.chainId, signedTx, mode as BroadcastMode),
       signDoc: signResponse.signed,
     };
+
+    console.log("base.ts:broadcastMsgs - Succesfully generated return val");
+    return retVal;
   }
 
   get instance(): AxiosInstance {

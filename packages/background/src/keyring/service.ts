@@ -242,6 +242,8 @@ export class KeyRingService {
       throw new Error("Signer mismatched");
     }
 
+    console.log("keyring/service.ts - Beginning request sign Amino");
+
     const isADR36SignDoc = checkAndValidateADR36AminoSignDoc(
       signDoc,
       bech32Prefix
@@ -287,6 +289,10 @@ export class KeyRingService {
       }
     }
 
+    console.log(
+      `keyring/service.ts - Signing Ethereum Sign Amino: ${signOptions.isEthereum}`
+    );
+
     try {
       const signature = await this.keyRing.sign(
         env,
@@ -294,6 +300,8 @@ export class KeyRingService {
         coinType,
         serializeSignDoc(newSignDoc)
       );
+
+      console.log("keyring/service.ts - Returning Ethereum signed signature");
 
       return {
         signed: newSignDoc,
