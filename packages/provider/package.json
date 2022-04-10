@@ -19,6 +19,7 @@
   "dependencies": {
     "@cosmjs/launchpad": "^0.24.0-alpha.25",
     "@cosmjs/proto-signing": "^0.24.0-alpha.25",
+    "@ethersproject/transactions": "^5.6.0",
     "@keplr-wallet/router": "^0.9.6",
     "@keplr-wallet/types": "^0.9.12",
     "buffer": "^6.0.3",

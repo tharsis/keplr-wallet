@@ -158,6 +158,10 @@ export class MockKeplr implements Keplr {
     throw new Error("Not implemented");
   }
 
+  signEthereum(): Promise<any> {
+    throw new Error("Not implemented");
+  }
+
   suggestToken(): Promise<void> {
     throw new Error("Not implemented");
   }

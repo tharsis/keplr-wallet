@@ -25,6 +25,8 @@ import { APP_PORT, Env, WEBPAGE_PORT } from "@keplr-wallet/router";
 import { InteractionService } from "../interaction";
 import { PermissionService } from "../permission";
 
+import { ethToEvmos } from "@tharsis/address-converter";
+
 import {
   encodeSecp256k1Signature,
   serializeSignDoc,
@@ -37,6 +39,8 @@ import { DirectSignResponse, makeSignBytes } from "@cosmjs/proto-signing";
 import { RNG } from "@keplr-wallet/crypto";
 import { cosmos } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
+
+import { UnsignedTransaction } from "@ethersproject/transactions";
 
 @singleton()
 export class KeyRingService {
@@ -350,6 +354,49 @@ export class KeyRingService {
       return {
         signed: newSignDoc,
         signature: encodeSecp256k1Signature(key.pubKey, signature),
+      };
+    } finally {
+      this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
+    }
+  }
+
+  async requestSignEthereum(
+    env: Env,
+    msgOrigin: string,
+    chainId: string,
+    signer: string,
+    transaction: UnsignedTransaction
+  ): Promise<{ publicKey: Uint8Array; signature: Uint8Array }> {
+    console.log("Servicing signEthereum");
+    const coinType = await this.chainsService.getChainCoinType(chainId);
+
+    const key = await this.keyRing.getKey(chainId, coinType);
+    const bech32Address = new Bech32Address(key.address).toBech32(
+      (await this.chainsService.getChainInfo(chainId)).bech32Config
+        .bech32PrefixAccAddr
+    );
+    if (ethToEvmos(signer) !== bech32Address) {
+      throw new Error("Signer mismatched");
+    }
+
+    await this.interactionService.waitApprove(env, "/sign", "request-sign", {
+      msgOrigin,
+      chainId,
+      signer,
+      tx: new TextEncoder().encode(JSON.stringify(transaction)),
+    });
+
+    try {
+      const signature = await this.keyRing.signEthereum(
+        chainId,
+        coinType,
+        // Convert transaction to string, then to bytes array
+        new TextEncoder().encode(JSON.stringify(transaction))
+      );
+
+      return {
+        publicKey: key.pubKey,
+        signature: signature,
       };
     } finally {
       this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});

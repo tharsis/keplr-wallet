@@ -24,6 +24,7 @@ import {
   GetSecret20ViewingKey,
   RequestSignAminoMsg,
   RequestSignDirectMsg,
+  RequestSignEthereumMsg,
   GetPubkeyMsg,
   ReqeustEncryptMsg,
   RequestDecryptMsg,
@@ -39,6 +40,8 @@ import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from "./cosmjs";
 import deepmerge from "deepmerge";
 import Long from "long";
 import { Buffer } from "buffer/";
+
+import { UnsignedTransaction } from "@ethersproject/transactions";
 
 export class Keplr implements IKeplr {
   protected enigmaUtils: Map<string, SecretUtils> = new Map();
@@ -186,6 +189,17 @@ export class Keplr implements IKeplr {
       BACKGROUND_PORT,
       new RequestVerifyADR36AminoSignDoc(chainId, signer, data, signature)
     );
+  }
+
+  async signEthereum(
+    chainId: string,
+    signer: string, // Signer as hex address
+    transaction: UnsignedTransaction
+  ): Promise<{ publicKey: Uint8Array; signature: Uint8Array }> {
+    console.log("Attempting sign Ethereum");
+    const msg = new RequestSignEthereumMsg(chainId, signer, transaction);
+
+    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 
   getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner {

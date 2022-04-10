@@ -15,6 +15,8 @@ import { BIP44, KeplrSignOptions, Key } from "@keplr-wallet/types";
 
 import { StdSignDoc, AminoSignResponse, StdSignature } from "@cosmjs/launchpad";
 
+import { UnsignedTransaction } from "@ethersproject/transactions";
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
 import { cosmos } from "@keplr-wallet/cosmos";
@@ -659,6 +661,39 @@ export class RequestSignDirectMsg extends Message<{
 
   type(): string {
     return RequestSignDirectMsg.type();
+  }
+}
+
+export class RequestSignEthereumMsg extends Message<{
+  readonly publicKey: Uint8Array;
+  readonly signature: Uint8Array;
+}> {
+  public static type() {
+    return "request-sign-ethereum";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly signer: string,
+    public readonly transaction: UnsignedTransaction
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    // Do nothing for now
+  }
+
+  approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestSignEthereumMsg.type();
   }
 }
 

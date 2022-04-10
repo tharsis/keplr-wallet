@@ -25,6 +25,8 @@ import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from "./cosmjs";
 import deepmerge from "deepmerge";
 import Long from "long";
 
+import { UnsignedTransaction } from "@ethersproject/transactions";
+
 export interface ProxyRequest {
   type: "proxy-request";
   id: string;
@@ -324,6 +326,20 @@ export class InjectedKeplr implements IKeplr {
       },
       signature: result.signature,
     };
+  }
+
+  async signEthereum(
+    chainId: string,
+    signer: string, // Signer as hex address
+    transaction: UnsignedTransaction
+  ): Promise<{ publicKey: Uint8Array; signature: Uint8Array }> {
+    const result = await this.requestMethod("signEthereum", [
+      chainId,
+      signer,
+      transaction,
+    ]);
+
+    return result;
   }
 
   async signArbitrary(

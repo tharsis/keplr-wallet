@@ -11,6 +11,8 @@ import { DirectSignResponse, OfflineDirectSigner } from "@cosmjs/proto-signing";
 import { SecretUtils } from "secretjs/types/enigmautils";
 import Long from "long";
 
+import { UnsignedTransaction } from "@ethersproject/transactions";
+
 export interface Key {
   // Name of the selected key store.
   readonly name: string;
@@ -74,6 +76,11 @@ export interface Keplr {
     },
     signOptions?: KeplrSignOptions
   ): Promise<DirectSignResponse>;
+  signEthereum(
+    chainId: string,
+    signer: string, // Signer as hex address
+    transaction: UnsignedTransaction
+  ): Promise<{ publicKey: Uint8Array; signature: Uint8Array }>;
   sendTx(
     chainId: string,
     /*

@@ -6,6 +6,7 @@ import {
   UnlockKeyRingMsg,
   RequestSignAminoMsg,
   RequestSignDirectMsg,
+  RequestSignEthereumMsg,
   LockKeyRingMsg,
   DeleteKeyRingMsg,
   UpdateNameKeyRingMsg,
@@ -86,6 +87,11 @@ export const getHandler: (service: KeyRingService) => Handler = (
         return handleRequestSignDirectMsg(service)(
           env,
           msg as RequestSignDirectMsg
+        );
+      case RequestSignEthereumMsg:
+        return handleRequestSignEthereumMsg(service)(
+          env,
+          msg as RequestSignEthereumMsg
         );
       case GetMultiKeyStoreInfoMsg:
         return handleGetMultiKeyStoreInfoMsg(service)(
@@ -342,6 +348,30 @@ const handleRequestSignDirectMsg: (
       },
       signature: response.signature,
     };
+  };
+};
+
+const handleRequestSignEthereumMsg: (
+  service: KeyRingService
+) => InternalHandler<RequestSignEthereumMsg> = (service) => {
+  return async (env, msg) => {
+    console.log("Handling sign Ethereum");
+
+    await service.permissionService.checkOrGrantBasicAccessPermission(
+      env,
+      msg.chainId,
+      msg.origin
+    );
+
+    const response = await service.requestSignEthereum(
+      env,
+      msg.origin,
+      msg.chainId,
+      msg.signer,
+      msg.transaction
+    );
+
+    return response;
   };
 };
 
