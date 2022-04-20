@@ -25,6 +25,8 @@ import { APP_PORT, Env, WEBPAGE_PORT } from "@keplr-wallet/router";
 import { InteractionService } from "../interaction";
 import { PermissionService } from "../permission";
 
+import { ethToEvmos } from "@tharsis/address-converter";
+
 import {
   encodeSecp256k1Signature,
   serializeSignDoc,
@@ -359,6 +361,51 @@ export class KeyRingService {
       return {
         signed: cosmJSSignDoc,
         signature: encodeSecp256k1Signature(key.pubKey, signature),
+      };
+    } finally {
+      this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
+    }
+  }
+
+  async requestSignEthereum(
+    env: Env,
+    msgOrigin: string,
+    chainId: string,
+    signer: string,
+    signBytes: Uint8Array
+  ): Promise<{ publicKey: Uint8Array; signature: Uint8Array }> {
+    console.log("Servicing signEthereum");
+    const coinType = await this.chainsService.getChainCoinType(chainId);
+
+    const key = await this.keyRing.getKey(chainId, coinType);
+    const bech32Address = new Bech32Address(key.address).toBech32(
+      (await this.chainsService.getChainInfo(chainId)).bech32Config
+        .bech32PrefixAccAddr
+    );
+    if (ethToEvmos(signer) !== bech32Address) {
+      throw new Error("Signer mismatched");
+    }
+
+    await this.interactionService.waitApprove(env, "/sign", "request-sign", {
+      msgOrigin,
+      chainId,
+      mode: "direct",
+      signDocBytes: signBytes,
+      signer,
+      // tx: signBytes,
+    });
+
+    try {
+      const signature = await this.keyRing.signEthereum(
+        chainId,
+        coinType,
+        // Convert transaction to string, then to bytes array
+        signBytes
+      );
+
+      return {
+        publicKey: key.pubKey,
+        signature: signature,
       };
     } finally {
       this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});

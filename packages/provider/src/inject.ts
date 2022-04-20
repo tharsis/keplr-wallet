@@ -341,6 +341,20 @@ export class InjectedKeplr implements IKeplr {
     };
   }
 
+  async signEthereum(
+    chainId: string,
+    signer: string, // Signer as hex address
+    signBytes: Uint8Array
+  ): Promise<{ publicKey: Uint8Array; signature: Uint8Array }> {
+    const result = await this.requestMethod("signEthereum", [
+      chainId,
+      signer,
+      signBytes,
+    ]);
+
+    return result;
+  }
+
   async signArbitrary(
     chainId: string,
     signer: string,

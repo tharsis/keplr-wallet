@@ -106,6 +106,8 @@ export class InteractionService {
     isInternal: boolean,
     data: unknown
   ): Promise<InteractionWaitingData> {
+    console.log("Adding data to map");
+
     const bytes = new Uint8Array(8);
     const id: string = Array.from(await this.rng(bytes))
       .map((value) => {
@@ -119,6 +121,9 @@ export class InteractionService {
       isInternal,
       data,
     };
+
+    console.log("Created waiting data:");
+    console.log(interactionWaitingData);
 
     if (this.waitingMap.has(id)) {
       throw new Error("Id is aleady in use");

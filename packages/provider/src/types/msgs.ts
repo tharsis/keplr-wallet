@@ -1,7 +1,6 @@
 import { Message } from "@keplr-wallet/router";
 import { ChainInfo, KeplrSignOptions, Key } from "@keplr-wallet/types";
 import { AminoSignResponse, StdSignature, StdSignDoc } from "@cosmjs/launchpad";
-
 export class EnableAccessMsg extends Message<void> {
   public static type() {
     return "enable-access";
@@ -354,6 +353,35 @@ export class RequestSignDirectMsg extends Message<{
 
   type(): string {
     return RequestSignDirectMsg.type();
+  }
+}
+
+export class RequestSignEthereumMsg extends Message<{
+  readonly publicKey: Uint8Array;
+  readonly signature: Uint8Array;
+}> {
+  public static type() {
+    return "request-sign-ethereum";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly signer: string,
+    public readonly signBytes: Uint8Array
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    // Do nothing for now
+  }
+
+  route(): string {
+    return "keyring";
+  }
+
+  type(): string {
+    return RequestSignEthereumMsg.type();
   }
 }
 

@@ -73,6 +73,11 @@ export interface Keplr {
     },
     signOptions?: KeplrSignOptions
   ): Promise<DirectSignResponse>;
+  signEthereum(
+    chainId: string,
+    signer: string, // Signer as hex address
+    signBytes: Uint8Array
+  ): Promise<{ publicKey: Uint8Array; signature: Uint8Array }>;
   sendTx(
     chainId: string,
     tx: Uint8Array,

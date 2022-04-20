@@ -659,6 +659,39 @@ export class RequestSignDirectMsg extends Message<{
   }
 }
 
+export class RequestSignEthereumMsg extends Message<{
+  readonly publicKey: Uint8Array;
+  readonly signature: Uint8Array;
+}> {
+  public static type() {
+    return "request-sign-ethereum";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly signer: string,
+    public readonly signBytes: Uint8Array
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    // Do nothing for now
+  }
+
+  approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestSignEthereumMsg.type();
+  }
+}
+
 export class GetMultiKeyStoreInfoMsg extends Message<{
   multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
 }> {

@@ -24,6 +24,7 @@ import {
   GetSecret20ViewingKey,
   RequestSignAminoMsg,
   RequestSignDirectMsg,
+  RequestSignEthereumMsg,
   GetPubkeyMsg,
   ReqeustEncryptMsg,
   RequestDecryptMsg,
@@ -186,6 +187,17 @@ export class Keplr implements IKeplr {
       BACKGROUND_PORT,
       new RequestVerifyADR36AminoSignDoc(chainId, signer, data, signature)
     );
+  }
+
+  async signEthereum(
+    chainId: string,
+    signer: string, // Signer as hex address
+    signBytes: Uint8Array
+  ): Promise<{ publicKey: Uint8Array; signature: Uint8Array }> {
+    console.log("Attempting sign Ethereum");
+    const msg = new RequestSignEthereumMsg(chainId, signer, signBytes);
+
+    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 
   getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner {

@@ -44,6 +44,8 @@ export const DetailsTab: FunctionComponent<{
     const intl = useIntl();
     const language = useLanguage();
 
+    console.log(signDocHelper);
+
     const mode = signDocHelper.signDocWrapper
       ? signDocHelper.signDocWrapper.mode
       : "none";
