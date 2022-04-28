@@ -291,6 +291,7 @@ export class KeyRingService {
     }
 
     try {
+      console.log(`Signing with coinType ${coinType}`);
       const signature = await this.keyRing.sign(
         env,
         chainId,
@@ -298,9 +299,20 @@ export class KeyRingService {
         serializeSignDoc(newSignDoc)
       );
 
+      const encodedSignature = encodeSecp256k1Signature(key.pubKey, signature);
+
       return {
         signed: newSignDoc,
-        signature: encodeSecp256k1Signature(key.pubKey, signature),
+        signature: {
+          pub_key: {
+            type:
+              coinType !== 60
+                ? encodedSignature.pub_key.type
+                : "/ethermint.crypto.v1.ethsecp256k1.PubKey",
+            value: encodedSignature.pub_key.value,
+          },
+          signature: encodedSignature.signature,
+        },
       };
     } finally {
       this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
@@ -394,6 +406,8 @@ export class KeyRingService {
       signer,
       // tx: signBytes,
     });
+
+    console.log("Completed wait approve, trying sign");
 
     try {
       const signature = await this.keyRing.signEthereum(

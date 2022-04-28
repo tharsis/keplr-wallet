@@ -73,6 +73,9 @@ export const SignPage: FunctionComponent = observer(() => {
   const signDocHelper = useSignDocHelper(feeConfig, memoConfig);
   amountConfig.setSignDocHelper(signDocHelper);
 
+  console.log("Log sign doc helper");
+  console.log(signDocHelper);
+
   useEffect(() => {
     if (signInteractionStore.waitingData) {
       const data = signInteractionStore.waitingData;

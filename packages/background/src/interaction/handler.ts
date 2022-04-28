@@ -35,6 +35,7 @@ const handleRejectInteractionMsg: (
   service: InteractionService
 ) => InternalHandler<RejectInteractionMsg> = (service) => {
   return (_, msg) => {
+    console.log("Handler rejecting msg");
     return service.reject(msg.id);
   };
 };

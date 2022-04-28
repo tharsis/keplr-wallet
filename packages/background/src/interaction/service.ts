@@ -60,6 +60,7 @@ export class InteractionService {
     );
 
     const msg = new PushInteractionDataMsg(interactionWaitingData);
+    console.log("Requesting interaction from env");
 
     return await this.wait(msg.data.id, () => {
       env.requestInteraction(url, msg, options);
@@ -92,6 +93,7 @@ export class InteractionService {
   }
 
   reject(id: string) {
+    console.log(`Rejecting sign with id ${id}`);
     if (this.resolverMap.has(id)) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.resolverMap.get(id)!.onReject(new Error("Request rejected"));

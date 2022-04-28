@@ -114,6 +114,7 @@ export class InteractionStore implements InteractionForegroundHandler {
   @flow
   *reject(type: string, id: string) {
     this.removeData(type, id);
+    console.log("Rejecting from interaction.ts");
     yield this.msgRequester.sendMessage(
       BACKGROUND_PORT,
       new RejectInteractionMsg(id)
